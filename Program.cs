@@ -68,13 +68,13 @@ using (var scope = app.Services.CreateScope())
 // =================================================================
 // ▲▲▲  نهاية الكود المضاف ▲▲▲
 // =================================================================
-
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // 2. Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    
 }
 
 app.UseHttpsRedirection();
