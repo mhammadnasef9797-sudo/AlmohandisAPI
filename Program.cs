@@ -1,7 +1,7 @@
 using AlmohandisAPI.Data;
 using AlmohandisAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // تأكد من وجود هذا السطر
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -12,7 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // This registers our database connection service (DataContext).
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    // ▼▼▼ هذا هو السطر الوحيد الذي تم تغييره ▼▼▼
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 // This enables the use of Controllers in our project.
@@ -25,7 +26,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "http://localhost:5174") // Allow our frontend origin
+            policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -62,8 +63,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Enable CORS
-app.UseCors("AllowSpecificOrigin"); // This must be called before authentication/authorization
+app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -72,5 +72,4 @@ app.MapControllers();
 
 app.Run();
 
-// This makes the Program class visible to the EF Core tools.
 public partial class Program { }
