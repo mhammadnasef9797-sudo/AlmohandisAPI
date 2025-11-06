@@ -1,7 +1,7 @@
 using AlmohandisAPI.Data;
 using AlmohandisAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore; // تأكد من وجود هذا السطر
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -9,18 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. Add services to the container.
 
-// This registers our database connection service (DataContext).
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    // ▼▼▼ هذا هو السطر الوحيد الذي تم تغييره ▼▼▼
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// This enables the use of Controllers in our project.
 builder.Services.AddControllers();
 builder.Services.AddScoped<TokenService>();
 
-// Configure CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -32,7 +28,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Configure Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -46,13 +41,34 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// These services are for API documentation (Swagger).
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // ----------------------------------------------------
 
 var app = builder.Build();
+
+// =================================================================
+// ▼▼▼  الكود المضاف لتحديث قاعدة البيانات تلقائياً عند التشغيل ▼▼▼
+// =================================================================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<DataContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred during migration");
+    }
+}
+// =================================================================
+// ▲▲▲  نهاية الكود المضاف ▲▲▲
+// =================================================================
+
 
 // 2. Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
