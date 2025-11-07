@@ -22,9 +22,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", 
+            policy.WithOrigins("http://localhost:5173",
                      "http://localhost:5174",
-                     "https://almohandis-store-frontend.onrender.com") // <== أضفنا الرابط الجديد هنا
+                     "https://almohandis-store-frontend.onrender.com",
+                      "https://almohandis-admin-frontend.onrender.com") // <== أضفنا الرابط الجديد هنا
       .AllowAnyHeader()
       .AllowAnyMethod();
         });
